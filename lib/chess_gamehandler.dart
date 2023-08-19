@@ -1,14 +1,15 @@
 import 'package:my_app/chess_piece.dart';
+import 'utils.dart';
 
 class ChessGameHandler {
   ChessSide? currentTurn;
   List<ChessPiece> chessPieces = [
     '♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖',
     '♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙',
-    '', '', '', '', '', '', '', '',
-    '', '', '', '', '', '', '', '',
-    '', '', '', '', '', '', '', '',
-    '', '', '', '', '', '', '', '',
+    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
     '♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟',
     '♜', '♞', '♝', '♛', '♚', '♝', '♞', '♜',
   ].map((e) => ChessPiece.parse(e)).toList();
@@ -21,10 +22,10 @@ class ChessGameHandler {
     chessPieces = [
       '♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖',
       '♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙',
-      '', '', '', '', '', '', '', '',
-      '', '', '', '', '', '', '', '',
-      '', '', '', '', '', '', '', '',
-      '', '', '', '', '', '', '', '',
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
       '♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟',
       '♜', '♞', '♝', '♛', '♚', '♝', '♞', '♜',
     ].map((e) => ChessPiece.parse(e)).toList();
@@ -34,16 +35,13 @@ class ChessGameHandler {
   }
 
   void movePiece(int index, int destinationIndex) {
-    var movedPiece = chessPieces[index];
-    var movedToTile = chessPieces[destinationIndex];
+    ChessPiece pieceToMove = chessPieces[index];
+    if (pieceToMove.side != currentTurn) return;
 
-    if (movedPiece.side != currentTurn) return;
-
-    chessPieces[destinationIndex] = movedPiece;
-    chessPieces[index] = movedToTile.icon().isEmpty ? movedToTile : ChessPiece(null);
+    final result = movePieceCheck(chessPieces, index, destinationIndex);
 
     logStateIndex += 1;
-    final moveLog = (currentTurn, index, destinationIndex, movedToTile.icon());
+    final moveLog = (currentTurn, index, destinationIndex, result.$2.icon());
     moveLogs = moveLogs.sublist(0, logStateIndex);
     moveLogs.add(moveLog);
     print("$moveLog");

@@ -28,7 +28,7 @@ class ChessPiece {
   ///   [],                     // -> right
   /// ]
   List<List<int>> getDirectionalMoves(int index) {
-    return [];
+    return List.filled(8, []);
   }
 
   List<int> getDirectionalMoveIndices(int index) {
@@ -36,18 +36,29 @@ class ChessPiece {
     return locations.expand((direction) => direction).toList();
   }
 
-  List<int> getMovableIndices(List<ChessPiece> chessPieces, int index) {
+  List<int> getMovableIndices(List<ChessPiece> chessPieces, int index, { bool includeCheck = true }) {
     final directionalMoves = getDirectionalMoves(index);
     final filteredLocations = directionalMoves.map((direction) {
       List<int> indices = [];
-      for(var i = 0; i < direction.length; i ++) {
+      for(var i = 0; i < direction.length; i++) {
         int pieceIndex = direction[i];
         ChessPiece piece = chessPieces[pieceIndex];
-        if (piece.icon().isEmpty) {
-          indices.add(pieceIndex);
-          continue;
-        } else {
-          if (piece.side != side) indices.add(pieceIndex);
+
+        try {
+          if (piece.icon().isEmpty || piece.side != side) {
+            bool add = true;
+            if (includeCheck) {
+              final (nextStepPieces, _) = movePieceCheck(chessPieces, index, pieceIndex, clone: true);
+              add = !isKingThreatened(nextStepPieces, side!);
+            }
+            if (add) indices.add(pieceIndex);
+            // indices.add(pieceIndex);
+          }
+
+          if (piece.icon().isNotEmpty) break;
+        } catch(error) {
+          print("Error on: $index for move index $pieceIndex of chessPieces with length ${chessPieces.length}");
+          print("Directional moves: $directionalMoves");
           break;
         }
       }
@@ -56,6 +67,30 @@ class ChessPiece {
     }).toList();
 
     return filteredLocations.expand((direction) => direction).toList();
+  }
+
+  bool isEnemy(ChessPiece chessPiece) {
+    if (side == null || chessPiece.side == null) return false;
+    return side != chessPiece.side;
+  }
+
+  bool isThreatened(List<ChessPiece> chessPieces) {
+    // print('Checking $this if threatened');
+    final index = chessPieces.indexOf(this);
+    // print('----------$index----------');
+    if (side == null) return false;
+
+    for(final (i, chessPiece) in chessPieces.indexed) {
+      if (!isEnemy(chessPiece)) continue;
+      final movableIndices = chessPiece.getMovableIndices(chessPieces, i, includeCheck: false);
+      if (movableIndices.isEmpty) continue;
+      if (movableIndices.contains(index)) return true;
+    }
+    return false;
+  }
+
+  ChessPiece clone() {
+    return ChessPiece.parse(icon());
   }
 
   static ChessPiece parse(String icon) {
@@ -212,8 +247,9 @@ class ChessPiecePawn extends ChessPiece {
   }
 
   @override
-  List<int> getMovableIndices(List<ChessPiece> chessPieces, int index) {
-    final movableIndices = super.getMovableIndices(chessPieces, index);
+  List<int> getMovableIndices(List<ChessPiece> chessPieces, int index, { bool includeCheck = true }) {
+    final movableIndices = super.getMovableIndices(chessPieces, index, includeCheck: includeCheck);
+    if (movableIndices.isEmpty) return movableIndices;
     // if the parent function does its job well,
     // the last element should be the farthest forward move
     int lastForwardMoveIndex = movableIndices.last;

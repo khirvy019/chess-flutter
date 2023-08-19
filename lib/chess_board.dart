@@ -106,6 +106,9 @@ class ChessboardState extends State<Chessboard> {
         Border? border;
         if (isSelected) border = Border.all(color: Colors.brown.shade900, width: 4);
         if (movableTiles.contains(index)) border = Border.all(color: Colors.brown.shade900, width: 4);
+        if (piece.runtimeType == ChessPieceKing && piece.isThreatened(gameHandler.chessPieces)) {
+          border = Border.all(color: Colors.red, width: 4);
+        }
 
         final cellContent = Column(mainAxisAlignment: MainAxisAlignment.center, children: []);
         final pieceImage = resolveImage(piece);
