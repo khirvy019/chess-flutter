@@ -61,30 +61,30 @@ class ChessPiece {
   static ChessPiece parse(String icon) {
     switch(icon) {
       case "♜":
-        return ChessPieceRook(ChessSide.black);
+        return ChessPieceRook(ChessSide.white);
       case "♞":
-        return ChessPieceHorse(ChessSide.black);
+        return ChessPieceHorse(ChessSide.white);
       case "♝":
-        return ChessPieceBishop(ChessSide.black);
+        return ChessPieceBishop(ChessSide.white);
       case "♛":
-        return ChessPieceQueen(ChessSide.black);
+        return ChessPieceQueen(ChessSide.white);
       case "♚":
-        return ChessPieceKing(ChessSide.black);
+        return ChessPieceKing(ChessSide.white);
       case "♟":
-        return ChessPiecePawn(ChessSide.black);
+        return ChessPiecePawn(ChessSide.white);
 
       case "♖":
-        return ChessPieceRook(ChessSide.white);
+        return ChessPieceRook(ChessSide.black);
       case "♘":
-        return ChessPieceHorse(ChessSide.white);
+        return ChessPieceHorse(ChessSide.black);
       case "♗":
-        return ChessPieceBishop(ChessSide.white);
+        return ChessPieceBishop(ChessSide.black);
       case "♕":
-        return ChessPieceQueen(ChessSide.white);
+        return ChessPieceQueen(ChessSide.black);
       case "♔":
-        return ChessPieceKing(ChessSide.white);
+        return ChessPieceKing(ChessSide.black);
       case "♙":
-        return ChessPiecePawn(ChessSide.white);
+        return ChessPiecePawn(ChessSide.black);
       default:
         return ChessPiece(null);
     }
@@ -96,7 +96,7 @@ class ChessPieceKing extends ChessPiece {
   ChessPieceKing(super.side);
   @override
   String icon() {
-    return side == ChessSide.black ? "♚" : "♔";
+    return side == ChessSide.white ? "♚" : "♔";
   }
 
   @override
@@ -110,7 +110,7 @@ class ChessPieceQueen extends ChessPiece {
   ChessPieceQueen(super.side);
   @override
   String icon() {
-    return side == ChessSide.black ? "♛" : "♕";
+    return side == ChessSide.white ? "♛" : "♕";
   }
 
   @override
@@ -124,7 +124,7 @@ class ChessPieceBishop extends ChessPiece {
   ChessPieceBishop(super.side);
   @override
   String icon() {
-    return side == ChessSide.black ? "♝" : "♗";
+    return side == ChessSide.white ? "♝" : "♗";
   }
 
   @override
@@ -143,7 +143,7 @@ class ChessPieceHorse extends ChessPiece {
   ChessPieceHorse(super.side);
   @override
   String icon() {
-    return side == ChessSide.black ? "♞" : "♘";
+    return side == ChessSide.white ? "♞" : "♘";
   }
 
   @override
@@ -175,7 +175,7 @@ class ChessPieceRook extends ChessPiece {
 
   @override
   String icon() {
-    return side == ChessSide.black ? "♜" : "♖";
+    return side == ChessSide.white ? "♜" : "♖";
   }
 
   @override
@@ -203,10 +203,10 @@ class ChessPiecePawn extends ChessPiece {
 
     final coords = indexToCoords(index);
     bool canMove2TilesForward = false;
-    if (coords.$2 == 1 && side == ChessSide.white) { canMove2TilesForward = true; }
-    else if(coords.$2 == 6 && side == ChessSide.black) { canMove2TilesForward = true; }
+    if (coords.$2 == 1 && side == ChessSide.black) { canMove2TilesForward = true; }
+    else if(coords.$2 == 6 && side == ChessSide.white) { canMove2TilesForward = true; }
 
-    directions[side == ChessSide.white ? 4 : 0] = canMove2TilesForward ? 2 : 1;
+    directions[side == ChessSide.black ? 4 : 0] = canMove2TilesForward ? 2 : 1;
     List<List<int>> locations = generateDirectionalMoves(index, directions);
     return locations;
   }
@@ -222,8 +222,8 @@ class ChessPiecePawn extends ChessPiece {
 
     // check for diagonal forward moves that it can eat
     List<int> checkEnemyExists = [];
-    if (side == ChessSide.black) checkEnemyExists = [index-9, index-7]; // Northwest & Northwest tile
-    if (side == ChessSide.white) checkEnemyExists = [index+9, index+7]; // Southeast & Southwest tile
+    if (side == ChessSide.white) checkEnemyExists = [index-9, index-7]; // Northwest & Northwest tile
+    if (side == ChessSide.black) checkEnemyExists = [index+9, index+7]; // Southeast & Southwest tile
     for (var indexToCheck in checkEnemyExists) {
       if (indexToCheck < 0 || indexToCheck >= 64) continue;
 
@@ -235,7 +235,7 @@ class ChessPiecePawn extends ChessPiece {
 
   @override
   String icon() {
-    return side == ChessSide.black ? "♟" : "♙";
+    return side == ChessSide.white ? "♟" : "♙";
   }
 }
 

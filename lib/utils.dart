@@ -17,6 +17,6 @@ String indexToAlgebraicNotation(int index) {
 String coordsToAlgebraicNotation(int x, int y) {
   const X = 'abcdefgh';
 
-  final algebraicNotation = (X[x], (y+1).toString());
+  final algebraicNotation = (X[x], (8-y).toString());
   return "${algebraicNotation.$1}${algebraicNotation.$2}";
 }
