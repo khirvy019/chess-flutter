@@ -23,6 +23,37 @@ class ChessboardState extends State<Chessboard> {
     selectedPieceIndex = index;
   }
 
+  Image? resolveImage(ChessPiece piece) {
+    String imageFileName = '';
+    if (piece.side == null) return null;
+
+    switch (piece.runtimeType) {
+      case ChessPieceKing:
+        imageFileName = piece.side == ChessSide.black ? 'black_king' : 'white_king';
+        break;
+      case ChessPieceQueen:
+        imageFileName = piece.side == ChessSide.black ? 'black_queen' : 'white_queen';
+        break;
+      case ChessPieceBishop:
+        imageFileName = piece.side == ChessSide.black ? 'black_bishop' : 'white_bishop';
+        break;
+      case ChessPieceHorse:
+        imageFileName = piece.side == ChessSide.black ? 'black_horse' : 'white_horse';
+        break;
+      case ChessPieceRook:
+        imageFileName = piece.side == ChessSide.black ? 'black_rook' : 'white_rook';
+        break;
+      case ChessPiecePawn:
+        imageFileName = piece.side == ChessSide.black ? 'black_pawn' : 'white_pawn';
+        break;
+    }
+
+    if (imageFileName.isNotEmpty) {
+      return Image.asset('assets/images/pieces/$imageFileName.png');
+    }
+    return null;
+  }
+
   restartGameConfirm(BuildContext context) {
     // set up the button
     Widget okButton = ElevatedButton(
@@ -66,56 +97,43 @@ class ChessboardState extends State<Chessboard> {
         crossAxisCount: 8,
       ),
       itemBuilder: (BuildContext context, int index) {
-        final row = index ~/ 8;
-        final col = index % 8;
+        final (row, col) = indexToCoords(index);
         final isWhite = (row + col) % 2 == 0;
-        final color = isWhite ? Colors.white : Colors.black;
+        final color = isWhite ? Colors.white : Colors.brown;
         final piece = gameHandler.chessPieces[index];
         final isSelected = selectedPieceIndex == index;
 
         Border? border;
-        if (isSelected) border = Border.all(color: Colors.green, width: 4);
-        if (movableTiles.contains(index)) border = Border.all(color: Colors.green, width: 4);
+        if (isSelected) border = Border.all(color: Colors.brown.shade900, width: 4);
+        if (movableTiles.contains(index)) border = Border.all(color: Colors.brown.shade900, width: 4);
 
-        return GestureDetector(
-          onTap: () => setState(() {
-            final clickedPiece = gameHandler.chessPieces[index];
-            print("Clicked: ${clickedPiece.icon()}");
-            if (selectedPieceIndex >= 0) {
-              if (gameHandler.canMoveAsPiece(selectedPieceIndex, index)) {
-                gameHandler.movePiece(selectedPieceIndex, index);
-                gameHandler.toggleTurn();
-                print("Current turn: ${gameHandler.currentTurn}");
-              }
-              setSelectedPieceIndex(-1);
-            } else if(clickedPiece.icon().isNotEmpty && clickedPiece.side == gameHandler.currentTurn) {
-              // Set the selected piece index
-              setSelectedPieceIndex(index);
-              gameHandler.canMoveAsPiece(selectedPieceIndex, -1);
+        final cellContent = Column(mainAxisAlignment: MainAxisAlignment.center, children: []);
+        final pieceImage = resolveImage(piece);
+        if (pieceImage != null) cellContent.children.add(pieceImage);
+
+        onCellClick() => setState(() {
+          final clickedPiece = gameHandler.chessPieces[index];
+          print("Clicked: ${clickedPiece.icon()}");
+          if (selectedPieceIndex >= 0) {
+            if (gameHandler.canMoveAsPiece(selectedPieceIndex, index)) {
+              gameHandler.movePiece(selectedPieceIndex, index);
+              gameHandler.toggleTurn();
+              print("Current turn: ${gameHandler.currentTurn}");
             }
-          }),
+            setSelectedPieceIndex(-1);
+          } else if(clickedPiece.icon().isNotEmpty && clickedPiece.side == gameHandler.currentTurn) {
+            // Set the selected piece index
+            setSelectedPieceIndex(index);
+            gameHandler.canMoveAsPiece(selectedPieceIndex, -1);
+          }
+        });
+        return GestureDetector(
+          onTap: onCellClick,
           child: Container(
             width: 40, // Adjust the square size as per your requirement
             height: 40, // Adjust the square size as per your requirement
-            decoration: BoxDecoration(
-              border: border,
-              color: color,
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Text("$index", style: TextStyle(color: isWhite ? Colors.black : Colors.white)),
-                  Text(
-                    piece.icon(),
-                    style: TextStyle(
-                      fontSize: 32,
-                      color: isWhite ? Colors.black : Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            decoration: BoxDecoration(border: border, color: color),
+            child: Center(child: cellContent),
           ),
         );
       },
@@ -157,8 +175,8 @@ class ChessboardState extends State<Chessboard> {
       final moveLog = gameHandler.moveLogs[i];
 
       final turn = formatChessSide(moveLog.$1);
-      final moveFrom = indexToAlgebraicNotation(moveLog.$3);
-      final moveTo = indexToAlgebraicNotation(moveLog.$2);
+      final moveFrom = indexToAlgebraicNotation(moveLog.$2);
+      final moveTo = indexToAlgebraicNotation(moveLog.$3);
 
       gameLogTable.children.add(TableRow(
         children: [
