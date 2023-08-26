@@ -54,6 +54,54 @@ class ChessboardState extends State<Chessboard> {
     return null;
   }
 
+  startGame() {
+    if (gameHandler.currentTurn != null) {
+      print("Game is already started");
+      return;
+    }
+
+    print("Starting");
+    gameHandler.toggleTurn();
+    print("Current turn: ${gameHandler.currentTurn}");
+
+  }
+
+  startGameDialog(BuildContext context) {
+    // set up the button
+    Widget okButton = ElevatedButton(
+      child: Text("Start game"),
+      onPressed: () => setState(() {
+        gameHandler.reset();
+        selectedPieceIndex = -1;
+        startGame();
+        Navigator.of(context, rootNavigator: true).pop('dialog');
+      }),
+    );
+
+    Widget cancelButton = ElevatedButton(
+      child: Text("Cancel"),
+      onPressed: () {
+        Navigator.of(context, rootNavigator: true).pop('dialog');
+      },
+    );
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Start game"),
+      // content: Text("Restart match are you sure?"),
+      actions: [
+        cancelButton,
+        okButton,
+      ],
+    );
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
   restartGameConfirm(BuildContext context) {
     // set up the button
     Widget okButton = ElevatedButton(
@@ -117,6 +165,11 @@ class ChessboardState extends State<Chessboard> {
         onCellClick() => setState(() {
           final clickedPiece = gameHandler.chessPieces[index];
           print("Clicked: ${clickedPiece.icon()}");
+          if (gameHandler.currentTurn == null) {
+            startGameDialog(context);
+            return;
+          }
+
           if (selectedPieceIndex >= 0) {
             if (gameHandler.canMoveAsPiece(selectedPieceIndex, index)) {
               gameHandler.movePiece(selectedPieceIndex, index);
@@ -208,9 +261,7 @@ class ChessboardState extends State<Chessboard> {
       padding: EdgeInsets.all(4),
       child: ElevatedButton(
         onPressed: () => setState(() {
-          print("Starting");
-          gameHandler.toggleTurn();
-          print("Current turn: ${gameHandler.currentTurn}");
+          startGame();
         }),
         child: Text('Start'),
       )
